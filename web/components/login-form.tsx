@@ -22,12 +22,23 @@ export function LoginForm() {
 
     try {
       if (mode === "signin") {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const {
+          data: { session },
+          error: signInError,
+        } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (signInError) {
           throw signInError;
+        }
+        if (session) {
+          await fetch("/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ event: "SIGNED_IN", session }),
+          });
         }
       } else {
         const { error: signUpError } = await supabase.auth.signUp({
