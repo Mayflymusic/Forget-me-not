@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -9,7 +10,7 @@ import {
 async function signOut() {
   "use server";
 
-  const supabase = createSupabaseServerActionClient();
+  const supabase: any = createSupabaseServerActionClient();
   await supabase.auth.signOut();
   redirect("/login");
 }
@@ -25,7 +26,7 @@ async function addDevice(formData: FormData) {
     return;
   }
 
-  const supabase = createSupabaseServerActionClient();
+  const supabase: any = createSupabaseServerActionClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -39,11 +40,13 @@ async function addDevice(formData: FormData) {
       ? providedSecret
       : randomUUID().replace(/-/g, "").slice(0, 24);
 
-  await supabase.from("devices").insert({
-    name: name || null,
-    role,
-    secret,
-  });
+  await (supabase as any)
+    .from("devices")
+    .insert({
+      name: name || null,
+      role,
+      secret,
+    });
 
   revalidatePath("/");
 }
@@ -56,7 +59,7 @@ async function deleteDevice(formData: FormData) {
     return;
   }
 
-  const supabase = createSupabaseServerActionClient();
+  const supabase: any = createSupabaseServerActionClient();
   await supabase.from("devices").delete().eq("id", deviceId);
   revalidatePath("/");
 }
@@ -100,10 +103,12 @@ async function createPair(formData: FormData) {
     return;
   }
 
-  await supabase.from("pairs").insert({
-    sender_id: senderId,
-    receiver_id: receiverId,
-  });
+  await (supabase as any)
+    .from("pairs")
+    .insert({
+      sender_id: senderId,
+      receiver_id: receiverId,
+    });
 
   revalidatePath("/");
 }
@@ -122,7 +127,7 @@ async function deletePair(formData: FormData) {
 }
 
 export default async function HomePage() {
-  const supabase = createSupabaseServerComponentClient();
+  const supabase: any = createSupabaseServerComponentClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -147,12 +152,12 @@ export default async function HomePage() {
     ]);
 
   const deviceMap = new Map(
-    (devices ?? []).map((device) => [device.id, device])
+    (devices ?? []).map((device: any) => [device.id, device])
   );
 
   const enrichedEvents =
-    events?.map((event) => {
-      const pair = pairs?.find((item) => item.id === event.pair_id);
+    events?.map((event: any) => {
+      const pair = pairs?.find((item: any) => item.id === event.pair_id);
       if (!pair) {
         return {
           ...event,
@@ -161,8 +166,8 @@ export default async function HomePage() {
         };
       }
 
-      const sender = deviceMap.get(pair.sender_id);
-      const receiver = deviceMap.get(pair.receiver_id);
+      const sender = deviceMap.get(pair.sender_id) as any;
+      const receiver = deviceMap.get(pair.receiver_id) as any;
 
       return {
         ...event,
@@ -254,7 +259,7 @@ export default async function HomePage() {
           </form>
 
           <ul className="space-y-3">
-            {(devices ?? []).map((device) => (
+            {(devices ?? []).map((device: any) => (
               <li
                 key={device.id}
                 className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 md:flex-row md:items-center md:justify-between"
@@ -314,8 +319,8 @@ export default async function HomePage() {
                     Choose a sender
                   </option>
                   {(devices ?? [])
-                    .filter((device) => device.role === "sender")
-                    .map((device) => (
+                    .filter((device: any) => device.role === "sender")
+                    .map((device: any) => (
                       <option key={device.id} value={device.id}>
                         {device.name ?? device.id}
                       </option>
@@ -335,8 +340,8 @@ export default async function HomePage() {
                     Choose a receiver
                   </option>
                   {(devices ?? [])
-                    .filter((device) => device.role === "receiver")
-                    .map((device) => (
+                    .filter((device: any) => device.role === "receiver")
+                    .map((device: any) => (
                       <option key={device.id} value={device.id}>
                         {device.name ?? device.id}
                       </option>
@@ -351,9 +356,9 @@ export default async function HomePage() {
           </form>
 
           <ul className="space-y-3">
-            {(pairs ?? []).map((pair) => {
-              const sender = deviceMap.get(pair.sender_id);
-              const receiver = deviceMap.get(pair.receiver_id);
+            {(pairs ?? []).map((pair: any) => {
+              const sender = deviceMap.get(pair.sender_id) as any;
+              const receiver = deviceMap.get(pair.receiver_id) as any;
 
               return (
                 <li
@@ -404,7 +409,7 @@ export default async function HomePage() {
           </div>
 
           <ul className="space-y-3">
-            {enrichedEvents.map((event) => (
+            {enrichedEvents.map((event: any) => (
               <li
                 key={event.id}
                 className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4"
