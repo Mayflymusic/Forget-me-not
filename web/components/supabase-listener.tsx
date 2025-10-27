@@ -16,9 +16,15 @@ export function SupabaseListener({ accessToken }: Props) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.access_token !== accessToken) {
-        router.refresh();
-      }
+      fetch("/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: _event, session }),
+      }).finally(() => {
+        if (session?.access_token !== accessToken) {
+          router.refresh();
+        }
+      });
     });
 
     return () => {
