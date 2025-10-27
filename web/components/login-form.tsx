@@ -55,8 +55,11 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      } else {
+        router.replace("/");
+      }
     } catch (authError) {
       if (authError instanceof Error) {
         setError(authError.message);
