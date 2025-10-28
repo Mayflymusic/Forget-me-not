@@ -19,6 +19,7 @@ export function SupabaseListener({ accessToken }: Props) {
       fetch("/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ event: _event, session }),
       }).finally(() => {
         if (session?.access_token !== accessToken) {
